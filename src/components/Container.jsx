@@ -7,32 +7,58 @@ export default class Container extends React.Component {
             isMoving: false,
             isResizing: false,
             clickCoords: null,
-            currentDiff: null
+            currentDiff: null,
+            vModePosition: null,
+            hModePosition: null,
+            vModeSize: null,
+            hModeSize: null
         };
         this.container = null;
         this.clickCoords = null;
         this.currentCoords = null;
-        this.moveListener = this.moveListener.bind(this);
-        this.onMoveEndListener = this.onMoveEndListener.bind(this);
+        this.onMove = this.onMove.bind(this);
+        this.onMoveEnd = this.onMoveEnd.bind(this);
+        this.onResize = this.onResize.bind(this);
+        this.onResizeEnd = this.onResizeEnd.bind(this);
         this.resizePoints = [{
             vertical: 'top',
-            horizontal: 'left'
+            horizontal: 'left',
+            vModePosition: 1,
+            hModePosition: 1,
+            vModeSize: -1,
+            hModeSize: -1,
+            keepMode: 1
         }, {
             vertical: 'top',
-            horizontal: 'right'
+            horizontal: 'right',
+            vModePosition: 1,
+            hModePosition: 0,
+            vModeSize: -1,
+            hModeSize: 1,
+            keepMode: -1
         }, {
             vertical: 'bottom',
-            horizontal: 'right'
+            horizontal: 'right',
+            vModePosition: 0,
+            hModePosition: 0,
+            vModeSize: 1,
+            hModeSize: 1,
+            keepMode: 1
         }, {
             vertical: 'bottom',
-            horizontal: 'left'
+            horizontal: 'left',
+            vModePosition: 0,
+            hModePosition: 1,
+            vModeSize: 1,
+            hModeSize: -1,
+            keepMode: -1
         }];
         this.aspectRatio = 0;
     }
 
+    //#region Перетаскивание
     onMoveStart(e){
         if (e.nativeEvent.button!==0) return;
-        document.addEventListener('mouseup', this.onMoveEndListener);
         this.setState({
             isMoving: true,
             clickCoords: {
@@ -44,10 +70,11 @@ export default class Container extends React.Component {
                 y: 0
             }
         });
-        document.addEventListener('mousemove', this.moveListener);
+        document.addEventListener('mousemove', this.onMove);
+        document.addEventListener('mouseup', this.onMoveEnd);
     }
 
-    moveListener(e){
+    onMove(e){
         this.setState({
             currentDiff: {
                 x: e.pageX - this.state.clickCoords.x,
@@ -56,11 +83,11 @@ export default class Container extends React.Component {
         });
     }
 
-    onMoveEndListener(e){
+    onMoveEnd(e){
         if (e.button!==0) return;
-        document.removeEventListener('mousemove', this.moveListener);
-        document.removeEventListener('mouseup', this.onMoveEndListener);
-        this.props.onMove({
+        document.removeEventListener('mousemove', this.onMove);
+        document.removeEventListener('mouseup', this.onMoveEnd);
+        this.props.onChange({
             x: this.props.x + this.state.currentDiff.x,
             y: this.props.y + this.state.currentDiff.y
         });
@@ -70,16 +97,83 @@ export default class Container extends React.Component {
             currendDiff: null
         });
     }
+    //#endregion
+
+    //#region Ресайз
+    onResizeStart(point, e){
+        if (e.nativeEvent.button!==0) return;
+        e.stopPropagation();
+        const { vertical, horizontal, ...modes } = point;
+        this.setState({
+            ...modes,
+            isResizing: true,
+            clickCoords: {
+                x: e.nativeEvent.pageX,
+                y: e.nativeEvent.pageY
+            },
+            currentDiff: {
+                x: 0,
+                y: 0
+            }
+        });
+        document.addEventListener('mousemove', this.onResize);
+        document.addEventListener('mouseup', this.onResizeEnd);
+    }
+
+    onResize(e){
+        let x = e.pageX - this.state.clickCoords.x;
+        let y = e.pageY - this.state.clickCoords.y;
+        let yp = y<0 ? -1 : 1;
+        let xp = x<0 ? -1 : 1;
+        if (this.props.keepAspectRatio){
+            if (Math.abs(y / x) < this.aspectRatio){
+                y = x * this.aspectRatio * yp;
+            } else {
+                x = y / this.aspectRatio * xp;
+            }
+        };
+        this.setState({
+            currentDiff: {x, y}
+        });
+    }
+
+    onResizeEnd(e){
+        if (e.button!==0) return;
+        e.stopPropagation();
+        document.removeEventListener('mousemove', this.onResize);
+        document.removeEventListener('mouseup', this.onResizeEnd);
+        this.props.onChange({
+            width: this.props.width + this.state.hModeSize * this.state.currentDiff.x,
+            height: this.props.height + this.state.vModeSize * this.state.currentDiff.y,
+            x: this.props.x + this.state.hModePosition * this.state.currentDiff.x,
+            y: this.props.y + this.state.vModePosition * this.state.currentDiff.y
+        });
+        this.setState({
+            isResizing: false,
+            clickCoords: null,
+            currendDiff: null
+        });
+    }
+    //#endregion
 
     componentDidMount(){
-        this.aspectRatio = this.container.offsetWidth / this.container.offsetHeight;
+        this.aspectRatio = this.container.offsetHeight / this.container.offsetWidth;
     }
 
     render(){
-        let y = (this.state.isMoving ? this.props.y + this.state.currentDiff.y : this.props.y) + 'px';
-        let x = (this.state.isMoving ? this.props.x + this.state.currentDiff.x : this.props.x) + 'px';
-        let width = this.props.width ? this.props.width + 'px' : 'initial';
-        let height = this.props.height ? this.props.height + 'px' : 'initial';
+        let y = this.props.y + 'px';
+        let x = this.props.x + 'px';
+        let width = this.props.width + 'px';
+        let height = this.props.height + 'px';
+        if (this.state.isMoving){
+            y = (this.props.y + this.state.currentDiff.y) + 'px';
+            x = (this.props.x + this.state.currentDiff.x) + 'px';
+        } else if (this.state.isResizing){
+            width = (this.props.width + this.state.hModeSize * this.state.currentDiff.x) + 'px';
+            height = (this.props.height + this.state.vModeSize * this.state.currentDiff.y) + 'px';
+            x = (this.props.x + this.state.hModePosition * this.state.currentDiff.x) + 'px';
+            y = (this.props.y + this.state.vModePosition * this.state.currentDiff.y) + 'px';
+        };
         return (
             <div className="draggable-item"
                 style={{top: y, left: x, width, height}} 
@@ -91,7 +185,7 @@ export default class Container extends React.Component {
                         <div 
                             key={`resize-point-${i}`} 
                             className={`resize-point ${x.vertical} ${x.horizontal}`}
-                            onMouseDown={(e)=>{this.onResizeStart(e)}}
+                            onMouseDown={((point)=>(e)=>{this.onResizeStart(point, e)})(x)}
                         >
                         
                         </div>

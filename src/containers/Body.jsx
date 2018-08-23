@@ -16,8 +16,8 @@ class Image extends React.Component {
 
     render(){
         const { data } = this.props;
-        return (<div>
-            <img style={{width: '100%'}} src={data.image} ref={(e)=>{this.img=e}} />
+        return (<div className="image-element-container">
+            <img src={data.image} ref={(e)=>{this.img=e}} />
         </div>)
     }
 }
@@ -33,8 +33,8 @@ class Video extends React.Component {
 
     render(){
         const { data } = this.props;
-        return (<div>
-            <img style={{width: '100%', maxHeight: '100%'}} src={data.image} ref={(e)=>{this.img=e}} />
+        return (<div className="image-element-container">
+            <img src={data.image} ref={(e)=>{this.img=e}} />
         </div>)
     }
 
@@ -49,8 +49,8 @@ class Body extends React.Component {
         }
     }
 
-    onElementMove(id, e){
-        store.dispatch(actions.moveElement({id, x: e.x, y: e.y}));
+    onElementChange(id, e){
+        store.dispatch(actions.changeElement({id, ...e}));
     }
 
     render(){
@@ -68,7 +68,7 @@ class Body extends React.Component {
                                 x={x.x}
                                 width={x.width}
                                 height={x.height}
-                                onMove={((id)=>(e)=>{this.onElementMove(id, e)})(x.id)}
+                                onChange={((id)=>(e)=>{this.onElementChange(id, e)})(x.id)}
                             >
                                 <$component data={x.data} />
                             </Container>

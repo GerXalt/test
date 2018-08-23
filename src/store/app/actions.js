@@ -40,16 +40,9 @@ export function createVideo(data){
     };
 }
 
-export function moveElement(data){
+export function changeElement(data){
     return {
-        type: 'MOVE_ELEMENT',
-        data
-    }
-}
-
-export function resizeElement(data){
-    return {
-        type: 'MOVE_ELEMENT',
+        type: 'CHANGE_ELEMENT',
         data
     }
 }
