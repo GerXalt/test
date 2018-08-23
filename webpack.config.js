@@ -8,6 +8,7 @@ module.exports = {
     filename: 'main.js',
     path: path.resolve(__dirname, 'dist')
   },
+  devtool: 'eval',
   resolve: {
     modules: ['src', "node_modules"],
     extensions: ['.js', '.jsx'],
