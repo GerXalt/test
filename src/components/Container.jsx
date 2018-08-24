@@ -27,7 +27,8 @@ export default class Container extends React.Component {
             hModePosition: 1,
             vModeSize: -1,
             hModeSize: -1,
-            keepMode: 1
+            keepMode: -1,
+            keepVMode: 1
         }, {
             vertical: 'top',
             horizontal: 'right',
@@ -35,7 +36,8 @@ export default class Container extends React.Component {
             hModePosition: 0,
             vModeSize: -1,
             hModeSize: 1,
-            keepMode: -1
+            keepMode: 1,
+            keepVMode: 1
         }, {
             vertical: 'bottom',
             horizontal: 'right',
@@ -43,7 +45,8 @@ export default class Container extends React.Component {
             hModePosition: 0,
             vModeSize: 1,
             hModeSize: 1,
-            keepMode: 1
+            keepMode: -1,
+            keepVMode: -1
         }, {
             vertical: 'bottom',
             horizontal: 'left',
@@ -51,7 +54,8 @@ export default class Container extends React.Component {
             hModePosition: 1,
             vModeSize: 1,
             hModeSize: -1,
-            keepMode: -1
+            keepMode: 1,
+            keepVMode: -1
         }];
         this.aspectRatio = 0;
     }
@@ -122,18 +126,16 @@ export default class Container extends React.Component {
 
     onResize(e){
         let x = e.pageX - this.state.clickCoords.x;
-        let y = e.pageY - this.state.clickCoords.y;
-        let yp = y<0 ? -1 : 1;
-        let xp = x<0 ? -1 : 1;
+        let y = -1 * (e.pageY - this.state.clickCoords.y);
         if (this.props.keepAspectRatio){
-            if (Math.abs(y / x) < this.aspectRatio){
-                y = x * this.aspectRatio * yp;
+            if (y * this.state.keepVMode < this.aspectRatio * x * this.state.keepMode * this.state.keepVMode){
+                y = x * this.aspectRatio * this.state.keepMode;
             } else {
-                x = y / this.aspectRatio * xp;
+                x = y / this.aspectRatio * this.state.keepMode;
             }
         };
         this.setState({
-            currentDiff: {x, y}
+            currentDiff: {x, y: -1 * y}
         });
     }
 
