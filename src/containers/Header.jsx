@@ -31,7 +31,12 @@ class Header extends React.Component {
     onVideoButtonClick(){
         let videoUrl = prompt('YouTube video URL', 'https://www.youtube.com/watch?v=MNyG-xu-7SQ');
         if (!videoUrl) return;
-        let vid = videoUrl.match(/\?v=(.*)$/i)[1];
+        let vid = videoUrl.match(/\?v=(.*)$/i);
+        if (vid && vid[1]){
+            vid = vid[1]
+        } else {
+            return
+        };
         let image = `//img.youtube.com/vi/${vid}/maxresdefault.jpg`;
         store.dispatch(createVideo({image}));
     }
