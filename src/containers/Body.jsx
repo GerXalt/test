@@ -54,9 +54,9 @@ class Body extends React.Component {
     }
 
     render(){
-        const { items } = this.props.app;
+        const { items, height } = this.props.app;
         return (<div className="body">
-            <div className="draggable-container">
+            <div className="draggable-container" style={{ height: height + 'px' }}>
                 {
                     items.map((x, i)=>{
                         let $component = this.elements[x.type];
