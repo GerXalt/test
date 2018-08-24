@@ -4,14 +4,18 @@ export default class Container extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            isMoving: false,
+            isMoving: false, 
             isResizing: false,
-            clickCoords: null,
-            currentDiff: null,
-            vModePosition: null,
+            clickCoords: null, //первые координаты для ресайза и перетаскивания
+            currentDiff: null, //разница координат
+            //коэффициенты для ресайза, разные для каждой пипки за которую тянем
+            vModePosition: null, //насколько от разницы менять позицию
             hModePosition: null,
-            vModeSize: null,
-            hModeSize: null
+            vModeSize: null,    //насколько от разницы менять размер
+            hModeSize: null,
+            //для сохранения пропорций
+            keepMode: null,
+            keepVMode: null
         };
         this.container = null;
         this.clickCoords = null;
