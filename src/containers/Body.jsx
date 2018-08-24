@@ -17,7 +17,7 @@ class Image extends React.Component {
     render(){
         const { data } = this.props;
         return (<div className="image-element-container">
-            <img src={data.image} ref={(e)=>{this.img=e}} />
+            <img src={data.image} style={{width: '100%'}} ref={(e)=>{this.img=e}} />
         </div>)
     }
 }
